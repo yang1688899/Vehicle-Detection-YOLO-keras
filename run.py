@@ -36,10 +36,45 @@ def process_frame(frame):
     out_frame = utils.draw_boxes(frame, boxes)
     return out_frame
 
-def run_video(src_path,out_path):
-    project_video_clip = VideoFileClip(src_path)
-    project_video_out_clip = project_video_clip.fl_image(process_frame)
-    project_video_out_clip.write_videofile(out_path, audio=False)
+def run_video(src_path,out_path,batch_size=32):
+    cap = cv2.VideoCapture(src_path)
+    num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+    fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))
+    video_frames = []
+    for i in range(num_frames-1):
+        ret, frame = cap.read()
+        if ret:
+            frame = cv2.resize(frame, (416, 416))
+            frame = utils.preprocess_image(frame)
+            video_frames.append(frame)
+    cap.release()
+    video_frames = np.array(video_frames)
+
+    model = load_model("./model/yolov2-tiny-voc.h5")
+    all_predictions = None
+    print("predicting......")
+    for offset in range(0,64,batch_size):
+        end = offset + batch_size
+        predictions = model.predict(video_frames[offset:end])
+
+        if offset==0:
+            all_predictions = predictions
+        else:
+            all_predictions = np.concatenate((all_predictions,predictions),axis=0)
+
+    vedio_writer = cv2.VideoWriter(out_path,fourcc=fourcc,fps=fps,frameSize=(416,416))
+    for i in range(len(all_predictions)):
+        boxes = utils.process_predictions(all_predictions[0], probs_threshold=0.3, iou_threshold=0.1)
+        out_frame = utils.draw_boxes(video_frames[i], boxes)
+        vedio_writer.write(out_frame)
+
+
+
+
+
+
+
 
 #run_images("./test_images")
 run_video("./project_video.mp4","./out_video/out.mp4")
