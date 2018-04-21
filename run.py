@@ -15,9 +15,6 @@ def run_images(dir_path):
 
     image_processed = []
     for image in images:
-        cv2.imshow("resize", utils.preprocess_image(image))
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
         image_processed.append(utils.preprocess_image(image))
 
     model = load_model("./model/yolov2-tiny-voc.h5")
@@ -25,7 +22,7 @@ def run_images(dir_path):
 
     for i in range(predictions.shape[0]):
         boxes = utils.process_predictions(predictions[i],probs_threshold=0.3,iou_threshold=0.1)
-        out_image = utils.draw_boxes(image_processed[i],boxes)
+        out_image = utils.draw_boxes(images[i],boxes)
         cv2.imwrite('./out_images/out%s.jpg'%i, out_image)
 
 
@@ -56,5 +53,5 @@ def run_video(src_path,out_path,batch_size=32):
 
 
 
-# run_images("./test_images")
-run_video("./project_video.mp4","./out_video/out.mp4")
+run_images("./test_images")
+# run_video("./project_video.mp4","./out_video/out.mp4")
