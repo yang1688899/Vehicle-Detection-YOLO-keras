@@ -39,6 +39,27 @@ def preprocess_image(resized):
     out_image = resized/127.
     return out_image
 
+def preprocess_video(src_path):
+    cap = cv2.VideoCapture(src_path)
+    num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+    fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))
+    video_frames = []
+    for i in range(num_frames):
+        ret, frame = cap.read()
+        if ret:
+            frame = cv2.resize(frame, (416, 416))
+            frame = preprocess_image(frame)
+            video_frames.append(frame)
+    video_frames = np.array(video_frames)
+    cap.release()
+    return video_frames,num_frames,fps,fourcc
+
+def video_batch_gen(video_frames,batch_size=32):
+    for offset in range(0,len(video_frames),batch_size):
+        yield video_frames[offset:offset+batch_size]
+
+
 def load_weights(model, yolo_weight_file):
     data = np.fromfile(yolo_weight_file, np.float32)
     data = data[4:]
