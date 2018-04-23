@@ -1,11 +1,10 @@
 from keras.models import Sequential
 from keras.layers.convolutional import Convolution2D, MaxPooling2D
 from keras.layers.advanced_activations import LeakyReLU
-from keras.layers.core import Flatten, Dense, Activation, Reshape
-import numpy as np
-import matplotlib.pyplot as plt
-import cv2
+from keras.layers.core import Flatten, Dense
 
+#keras 实现 yolo_v1
+# 最终有使用，因为load_weights方法实现有问题
 def YOLO_net():
     model = Sequential()
     model.add(Convolution2D(filters=16,kernel_size=(3,3),input_shape=(448,448,3),padding='same',subsample=(1,1)))

@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 import os
 
+#yolo对应的分类
 classes = ["aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor"]
 colors = [(254.0, 254.0, 254), (239.88888888888889, 211.66666666666669, 127),
           (225.77777777777777, 169.33333333333334, 0), (211.66666666666669, 127.0, 254),
@@ -14,6 +15,7 @@ colors = [(254.0, 254.0, 254), (239.88888888888889, 211.66666666666669, 127),
           (28.222222222222236, -42.33333333333335, 127), (14.111111111111118, -84.66666666666664, 0),
           (0.0, 254.0, 254), (-14.111111111111118, 211.66666666666669, 127)]
 
+#用于将prediction计算转换为相对于图片的坐标
 anchors = [1.08, 1.19, 3.42, 4.41, 6.63, 11.38, 9.42, 5.11, 16.62, 10.52]
 
 class Box:
@@ -39,6 +41,7 @@ def preprocess_image(resized):
     out_image = resized/127.
     return out_image
 
+#把给定视频转换为图片
 def preprocess_video(src_path):
     cap = cv2.VideoCapture(src_path)
     num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -55,11 +58,13 @@ def preprocess_video(src_path):
     cap.release()
     return video_frames,num_frames,fps,fourcc
 
+#prediction_generator
 def video_batch_gen(video_frames,batch_size=32):
     for offset in range(0,len(video_frames),batch_size):
         yield video_frames[offset:offset+batch_size]
 
-
+#加载模型weights文件
+#该加载方法有问题，加载weights文件后model的prediction表现奇怪，疑为参数没有正确对应，项目中并没有使用该方法，留待后续修复
 def load_weights(model, yolo_weight_file):
     data = np.fromfile(yolo_weight_file, np.float32)
     data = data[4:]
@@ -75,37 +80,36 @@ def load_weights(model, yolo_weight_file):
             index += np.prod(kshape)
             layer.set_weights([ker, bia])
 
+#计算两个box的iou
 def iou(box1, box2):
-    # Determine the coordinates of the intersection rectangle
+    # 计算两box的相交坐标
     xA = max(box1.x1, box2.x1)
     yA = max(box1.y1, box2.y1)
     xB = min(box1.x2, box2.x2)
     yB = min(box1.y2, box2.y2)
 
-    # Compute the area of intersection
+    # 计算相交区域面积
     intersection_area = (xB - xA + 1) * (yB - yA + 1)
 
-    # Compute the area of both rectangles
+    # 计算两个box的各自面积
     box1_area = box1.w * box2.h
     box2_area = box2.w * box2.h
 
-    # Compute the IOU
+    # 计算iou
     iou = intersection_area / float(box1_area + box2_area - intersection_area)
 
     return iou
 
-
+#使用non_maxsuppression 筛选box
 def non_maximal_suppression(thresholded_boxes, iou_threshold=0.3):
     nms_boxes = []
     if len(thresholded_boxes) > 0:
-        # Add the best box because it will never be deleted
+        # 添加置信度最高的box
         nms_boxes.append(thresholded_boxes[0])
 
-        # For each box (starting from the 2nd) check its iou with the higher score B-Boxes
         i = 1
         while i < len(thresholded_boxes):
             n_boxes_to_check = len(nms_boxes)
-            # print('N boxes to check = {}'.format(n_boxes_to_check))
             to_delete = False
 
             j = 0
@@ -113,7 +117,6 @@ def non_maximal_suppression(thresholded_boxes, iou_threshold=0.3):
                 curr_iou = iou(thresholded_boxes[i], nms_boxes[j])
                 if (curr_iou > iou_threshold):
                     to_delete = True
-                # print('Checking box {} vs {}: IOU = {} , To delete = {}'.format(thresholded_predictions[i][0],nms_predictions[j][0],curr_iou,to_delete))
                 j = j + 1
 
             if to_delete == False:
@@ -122,7 +125,7 @@ def non_maximal_suppression(thresholded_boxes, iou_threshold=0.3):
 
     return nms_boxes
 
-#read anchors file
+#dui'q
 def get_anchors(filepath):
     file_object = open(filepath)
     try:
@@ -166,18 +169,14 @@ def process_predictions(prediction, n_grid=13, n_class=20, n_box=5, probs_thresh
 
     return filtered_boxes
 
-
+#在图片上画出box
 def draw_boxes(image,boxes):
     for i in range(len(boxes)):
         color = colors[boxes[i].clas]
         best_class_name = classes[boxes[i].clas]
 
-        # Put a class rectangle with box coordinates and a class label on the image
         image = cv2.rectangle(image, (boxes[i].x1, boxes[i].y1),
                                     (boxes[i].x2, boxes[i].y2),color)
-        # cv2.putText(image, best_class_name, (int((boxes[i].x1 + boxes[i].x2) / 2),
-        #                                            int((boxes[i].y1 + boxes[i].y2) / 2)),
-        #             cv2.FONT_HERSHEY_SIMPLEX, 1, color, 3)
 
         cv2.putText(
             image, best_class_name + ' : %.2f' % boxes[i].p_max,
@@ -186,10 +185,10 @@ def draw_boxes(image,boxes):
 
     return image
 
-
-def get_image_path(path):
+#获取给定文件夹下图片路径
+def get_image_path(dir):
     paths = []
-    for file in os.listdir(path):
-        file_path = os.path.join(path, file)
+    for file in os.listdir(dir):
+        file_path = os.path.join(dir, file)
         paths.append(file_path)
     return paths
