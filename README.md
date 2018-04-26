@@ -27,8 +27,11 @@ YOLO意为 You Only Look Once，是一种基于深度学习的端对端（end to
 (这里以输入为416x416的YOLOV2为例)
 
 首先将图片划分为13x13个栅格(grid cells):
+
 ![alt text][image1]
 
+每个栅格负责预测5个bounding box(bounding box包括中心点坐标x,y及其宽w,高h,共4个值)。对于每个bounding box预测其是否包含物体的confidence score（1个值）,及其所包含物体class的possibility分布(由于有20个class，这里有20个值)。
 
+把所有的bounding box都画到原图上可能看起来回事这样子的：
 
 
