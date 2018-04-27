@@ -30,8 +30,12 @@ YOLO意为 You Only Look Once，是一种基于深度学习的端对端（end to
 
 ![alt text][image1]
 
-每个栅格负责预测5个bounding box(bounding box包括中心点坐标x,y及其宽w,高h,共4个值)。对于每个bounding box预测其是否包含物体的confidence score（1个值）,及其所包含物体class的possibility分布(由于有20个class，这里有20个值)。
+每个栅格负责预测5个bounding box(bounding box包括中心点坐标x,y及其宽w,高h,共4个值)。对于每个bounding box预测其是否包含物体的confidence score（1个值）,及其所包含物体class的possibility分布(由于有20个class，这里有20个值)。最终模型的的输出为
 
-把所有的bounding box都画到原图上可能看起来回事这样子的：
+模型最终检测到13x13x5=845个bounding box把所有的bounding box都画到原图上可能会是这样子的：
+
+大多数的bounding box 的confidence score都是非常低的(也就是没有检测到物体的)，只要少数的bounding box 是高confidence score的,检测到物体的。通过confidence score与最大的class的possibility相乘可以得到该bounding box 包含某物体的置信度，对这一置信度进行阈值过滤可以把大部分无意义的bounding box过滤掉。剩下的bounding box 可能存在的多重检测问题(即一个物体被多个bounding box检测)可以用IOU,heatmap等方法进行过滤整合，得到最终检测结果。
+
+经过过滤处理的检测结果会是这样的：
 
 
