@@ -9,7 +9,7 @@
 [video1]: ./vedio_out/project_video_out.mp4 "Video"
 ## **车辆检测（YOLOV2)**
 
-ps:本来是打算keras构建模型结构，然后加载weights文件训练后了参数实现的，但一直没有搞清楚weights文件的参数是怎么和模型各层对应上，所以最后找了可以
+ps:本来是打算keras构建模型结构，然后加载weights文件训练后了参数实现的，但一直没有搞清楚weights文件的参数是怎么和模型各层对应上，最后找了[YAD2K](https://github.com/allanzelener/YAD2K),里面提供了把YOLOV2 weights文件直接转换成keras model文件的方法，就直接拿来用了。
 
 基于YOLOV2实现车辆检测
 
