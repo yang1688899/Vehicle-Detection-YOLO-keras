@@ -29,7 +29,7 @@ def run_images():
     model = load_model(args.model_file)
     predictions = model.predict(np.array(image_processed))
 
-    print('writing image to %s'%args.out_path)
+    print('writing image to %s'% args.out_path)
     for i in range(predictions.shape[0]):
         boxes = utils.process_predictions(predictions[i],probs_threshold=0.3,iou_threshold=0.1)
         out_image = utils.draw_boxes(images[i],boxes)
