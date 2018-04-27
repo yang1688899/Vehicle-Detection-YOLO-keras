@@ -1,17 +1,10 @@
 [//]: # (Image References)
 
 [image1]: ./rm_img/Grid.png
-[image2]: ./output_images/undistortion.png "Undistorted"
-[image3]: ./output_images/x_thred.png "x_thredx_thred"
-[image4]: ./output_images/mag_thresh.png 
-[image5]: ./output_images/dir_thresh.png
-[image6]: ./output_images/s_thresh.png
-[image7]: ./output_images/combined_all.png
-[image8]: ./output_images/trans_on_test.png
-[image9]: ./output_images/perspective_tran.png
-[image10]: ./output_images/histogram.png
-[image11]: ./output_images/sliding_window_search.png
-[image12]: ./output_images/pipelined.png
+[image2]: ./rm_img/yolo-output.png
+[image3]: ./rm_img/Scores.png
+[image4]: ./rm_img/Prediction.png
+
 
 [video1]: ./vedio_out/project_video_out.mp4 "Video"
 ## **车辆检测（YOLOV2)**
@@ -34,12 +27,15 @@ YOLO意为 You Only Look Once，是一种基于深度学习的端对端（end to
 
 以下为每个栅格的对应输出：
 
-
+![alt text][image2]
 
 模型最终检测到13x13x5=845个bounding box把所有的bounding box都画到原图上可能会是这样子的：
+
+![alt text][image3]
 
 大多数的bounding box 的confidence score都是非常低的(也就是没有检测到物体的)，只要少数的bounding box 是高confidence score的,检测到物体的。通过confidence score与最大的class的possibility相乘可以得到该bounding box 包含某物体的置信度，对这一置信度进行阈值过滤可以把大部分无意义的bounding box过滤掉。剩下的bounding box 可能存在的多重检测问题(即一个物体被多个bounding box检测)可以用IOU,heatmap等方法进行过滤整合，得到最终检测结果。
 
 经过过滤处理的检测结果会是这样的：
 
+![alt text][image4]
 
