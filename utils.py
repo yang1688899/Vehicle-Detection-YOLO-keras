@@ -17,7 +17,7 @@ colors = [(254.0, 254.0, 254), (239.88888888888889, 211.66666666666669, 127),
 
 #用于将prediction计算转换为相对于图片的坐标
 anchors = [1.08, 1.19, 3.42, 4.41, 6.63, 11.38, 9.42, 5.11, 16.62, 10.52]
-
+# anchors = [1.3221, 1.73145, 3.19275, 4.00944, 5.05587, 8.09892, 9.47112, 4.84053, 11.2364, 10.0071]
 class Box:
     def __init__(self):
         self.w = float()
@@ -60,8 +60,9 @@ def preprocess_video(src_path):
 
 #prediction_generator
 def video_batch_gen(video_frames,batch_size=32):
-    for offset in range(0,len(video_frames),batch_size):
-        yield video_frames[offset:offset+batch_size]
+    while True:
+        for offset in range(0,len(video_frames),batch_size):
+            yield video_frames[offset:offset+batch_size]
 
 #加载模型weights文件
 #该加载方法有问题，加载weights文件后model的prediction表现奇怪，疑为参数没有正确对应，项目中并没有使用该方法，留待后续修复

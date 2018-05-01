@@ -5,6 +5,7 @@ import numpy as np
 from keras.models import load_model
 import argparse
 from moviepy.editor import VideoFileClip
+from math import ceil
 
 def run_images():
     parser = argparse.ArgumentParser()
@@ -31,7 +32,7 @@ def run_images():
 
     print('writing image to %s'% args.out_path)
     for i in range(predictions.shape[0]):
-        boxes = utils.process_predictions(predictions[i],probs_threshold=0.3,iou_threshold=0.1)
+        boxes = utils.process_predictions(predictions[i],probs_threshold=0.2,iou_threshold=0.5)
         out_image = utils.draw_boxes(images[i],boxes)
         cv2.imwrite('%s/out%s.jpg'%(args.out_path,i), out_image)
 
@@ -43,7 +44,7 @@ def run_video(src_path,out_path,batch_size=32):
     model = load_model("./model/yolov2-tiny-voc.h5")
 
     print("predicting......")
-    predictions = model.predict_generator(gen)
+    predictions = model.predict_generator(gen,steps=ceil(len(video_frames)/batch_size))
 
     # vedio_writer = cv2.VideoWriter(out_path,fourcc=fourcc,fps=fps,frameSize=(416,416))
     for i in range(len(predictions)):
@@ -63,5 +64,5 @@ def run_video(src_path,out_path,batch_size=32):
 
 
 
-run_images()
-# run_video("./project_video.mp4","./out_video/out.mp4")
+# run_images()
+run_video("./city_ride_cut.mp4","./out_video/city_ride_out.mp4")
