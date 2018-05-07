@@ -9,9 +9,7 @@
 [video1]: ./vedio_out/project_video_out.mp4 "Video"
 ## **车辆检测（YOLOV2)**
 
-ps:本来是打算keras构建模型结构，然后加载weights文件训练后了参数实现的，但一直没有搞清楚weights文件的参数是怎么和模型各层对应上，最后找了[YAD2K](https://github.com/allanzelener/YAD2K),里面提供了把YOLOV2 weights文件直接转换成keras model文件的方法，就直接拿来用了。
-
-基于YOLOV2实现车辆检测
+基于YOLOV2-tiny实现车辆检测
 
 ### YOLO简介：
 YOLO意为 You Only Look Once，是一种基于深度学习的端对端（end to end）物体检测方法.与R-CNN,Fast-R-CNN,Faster-R-CNN等通过region proposal产生大量的可能包含待检测物体的 potential bounding box，再用分类器去判断每个 bounding box里是否包含有物体，以及物体所属类别的方法不同，YOLO将物体检测任务当做一个regression问题来处理.
@@ -40,11 +38,16 @@ YOLO意为 You Only Look Once，是一种基于深度学习的端对端（end to
 ![alt text][image4]
 
 ### 实现步骤
+
+ps:本来是打算keras构建模型结构，然后加载weights文件训练后了参数实现的，但一直没有搞清楚weights文件的参数是怎么和模型各层对应上，最后找了[YAD2K](https://github.com/allanzelener/YAD2K),里面提供了把YOLOV2 weights文件直接转换成keras model文件的方法，就直接拿来用了。
+
 使用[YAD2K](https://github.com/allanzelener/YAD2K)把weights文件转化为keras的h5文件
+
 使用model预测bounding box
+
 阈值筛选bounding box
 
-### 使用[YAD2K](https://github.com/allanzelener/YAD2K)把weights文件转化为keras的h5文件
+#### 使用[YAD2K](https://github.com/allanzelener/YAD2K)把weights文件转化为keras的h5文件
 下载相应的YOLO weights和cfg文件：[weight文件下载](https://pjreddie.com/darknet/yolov2/)
 获得[YAD2K](https://github.com/allanzelener/YAD2K)，运行yad2k.py文件，参数依次为：cfg文件路径，weights文件路径，model文件输出路径
 这里使用yolov2-tiny模型的voc版本，运行如下命令：
@@ -52,6 +55,7 @@ YOLO意为 You Only Look Once，是一种基于深度学习的端对端（end to
 python ./yad2k.py ./yolov2-tiny-voc.cfg ./yolov2-tiny-voc.weights ./model/yolov2-tiny-voc.h5
 ```
 
-### 使用model预测bounding box
+#### 使用model预测bounding box
+
 
 
