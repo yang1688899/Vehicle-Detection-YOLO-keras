@@ -39,3 +39,19 @@ YOLO意为 You Only Look Once，是一种基于深度学习的端对端（end to
 
 ![alt text][image4]
 
+### 实现步骤
+使用[YAD2K](https://github.com/allanzelener/YAD2K)把weights文件转化为keras的h5文件
+使用model预测bounding box
+阈值筛选bounding box
+
+### 使用[YAD2K](https://github.com/allanzelener/YAD2K)把weights文件转化为keras的h5文件
+下载相应的YOLO weights和cfg文件：[weight文件下载](https://pjreddie.com/darknet/yolov2/)
+获得[YAD2K](https://github.com/allanzelener/YAD2K)，运行yad2k.py文件，参数依次为：cfg文件路径，weights文件路径，model文件输出路径
+这里使用yolov2-tiny模型的voc版本，运行如下命令：
+```
+python ./yad2k.py ./yolov2-tiny-voc.cfg ./yolov2-tiny-voc.weights ./model/yolov2-tiny-voc.h5
+```
+
+### 使用model预测bounding box
+
+
