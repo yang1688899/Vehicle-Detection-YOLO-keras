@@ -99,7 +99,9 @@ model = load_model("./model/yolov2-tiny-voc.h5")
 print("predicting......")
 predictions = model.predict_generator(gen)
 ```
- 
+
+#### 阈值筛选bounding box
+得到predictions后，还要对predictions进行进一步处理,目的是过滤掉置信度低的及重叠的bounding box,使得每一个物体仅对应一个置信度最高的bounding box。
 
 
 
