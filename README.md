@@ -41,11 +41,11 @@ YOLO意为 You Only Look Once，是一种基于深度学习的端对端（end to
 
 ps:本来是打算keras构建模型结构，然后加载weights文件训练后了参数实现的，但一直没有搞清楚weights文件的参数是怎么和模型各层对应上，最后找了[YAD2K](https://github.com/allanzelener/YAD2K),里面提供了把YOLOV2 weights文件直接转换成keras model文件的方法，就直接拿来用了。
 
-使用[YAD2K](https://github.com/allanzelener/YAD2K)把weights文件转化为keras的h5文件
+* 使用[YAD2K](https://github.com/allanzelener/YAD2K)把weights文件转化为keras的h5文件
 
-使用model预测bounding box
+* 使用model预测bounding box
 
-阈值筛选bounding box
+* 阈值筛选bounding box
 
 #### 使用[YAD2K](https://github.com/allanzelener/YAD2K)把weights文件转化为keras的h5文件
 
@@ -58,6 +58,8 @@ python ./yad2k.py ./yolov2-tiny-voc.cfg ./yolov2-tiny-voc.weights ./model/yolov2
 ```
 
 #### 使用model预测bounding box
+这里是一个使用keras的"predict_generator"对视频进行预测的示例(如果只是对少量图片且内存显存足够可以直接用"predict"):
+
 
 
 
