@@ -5,8 +5,8 @@
 [image3]: ./rm_img/Scores.png
 [image4]: ./rm_img/Prediction.png
 [image5]: ./rm_img/Prediction.png
-[image6]: ./rm_img/out_nomns.png
-[image7]: ./rm_img/out_filtered.png
+[image6]: ./rm_img/out_nomns.jpg
+[image7]: ./rm_img/out_filtered.jpg
 
 
 [video1]: ./vedio_out/project_video_out.mp4 "Video"
