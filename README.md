@@ -5,7 +5,7 @@
 [image3]: ./rm_img/Scores.png
 [image4]: ./rm_img/Prediction.png
 [image5]: ./rm_img/Prediction.png
-[image6]: ./rm_img/out_nomns.jpg
+[image6]: ./rm_img/out_nonms.jpg
 [image7]: ./rm_img/out_filtered.jpg
 
 
@@ -203,6 +203,7 @@ def draw_boxes(image,boxes):
 
     return image
 ```
-结果图片：
+结果图片:
+
 ![alt text][image7]
 
