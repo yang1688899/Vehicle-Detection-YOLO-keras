@@ -14,15 +14,17 @@ def run_video(src_path,out_path,batch_size=32):
     print("predicting......")
     predictions = model.predict_generator(gen,steps=ceil(len(video_frames)/batch_size))
 
+    if not os.path.exists(out_path):
+        os.mkdir(out_path)
     # vedio_writer = cv2.VideoWriter(out_path,fourcc=fourcc,fps=fps,frameSize=(416,416))
     for i in range(len(predictions)):
-        boxes = utils.process_predictions(predictions[i], probs_threshold=0.3, iou_threshold=0.1)
+        boxes = utils.process_predictions(predictions[i], probs_threshold=0.3, iou_threshold=0.3)
         out_frame = utils.draw_boxes(video_frames[i], boxes)
         cv2.imshow('frame', out_frame)
-        write_path = '%s/%05d'%(out_path,i)
-        cv2.imwrite(write_path)
+        write_path = '%s/%05d.jpg'%(out_path,i)
+        cv2.imwrite(write_path,out_frame*127)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
         # vedio_writer.write(out_frame)
 
-run_video("./city_ride_cut.mp4","./out_video")
+run_video("./project_video.mp4","./out_video_img_1")
