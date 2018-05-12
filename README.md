@@ -4,6 +4,9 @@
 [image2]: ./rm_img/yolo-output.png
 [image3]: ./rm_img/Scores.png
 [image4]: ./rm_img/Prediction.png
+[image5]: ./rm_img/Prediction.png
+[image6]: ./rm_img/out_nomns.png
+[image7]: ./rm_img/out_filtered.png
 
 
 [video1]: ./vedio_out/project_video_out.mp4 "Video"
@@ -119,41 +122,39 @@ class Box:
 模型预测的是bounding box的中心点坐标x,y及其宽w,高h及是否包含物体的confidence score和其所包含物体class的possibility，其中中心点坐标x,y及其宽w,高h都是相对于每个栅格（grid cell）而言的，因此这些参数都需要进行转换。使用confidence score与最大的class的possibility相乘可以得到置信度，对这个置信度进行一些阈值过滤可以过滤掉置信度不高的bounding box:
 
 ```
-def process_predictions(prediction, n_grid=13, n_class=20, n_box=5, probs_threshold=0.3, iou_threshold=0.3):
-    prediction = np.reshape(prediction, (n_grid, n_grid, n_box, 5+n_class))
-    boxes = []
-    for row in range(n_grid):
-        for col in range(n_grid):
-            for b in range(n_box):
-                tx, ty, tw, th, tc = prediction[row, col, b, :5]
-                box = Box()
+prediction = np.reshape(prediction, (n_grid, n_grid, n_box, 5+n_class))
+boxes = []
+for row in range(n_grid):
+    for col in range(n_grid):
+        for b in range(n_box):
+            tx, ty, tw, th, tc = prediction[row, col, b, :5]
+            box = Box()
 
-                box.w = np.exp(tw) * anchors[2 * b + 0] * 32.0
-                box.h = np.exp(th) * anchors[2 * b + 1] * 32.0
+            box.w = np.exp(tw) * anchors[2 * b + 0] * 32.0
+            box.h = np.exp(th) * anchors[2 * b + 1] * 32.0
 
-                c_probs = softmax(prediction[row, col, b, 5:])
-                box.clas = np.argmax(c_probs)
-                box.p_max = np.max(c_probs) * sigmoid(tc)
+            c_probs = softmax(prediction[row, col, b, 5:])
+            box.clas = np.argmax(c_probs)
+            box.p_max = np.max(c_probs) * sigmoid(tc)
 
-                center_x = (float(col) + sigmoid(tx)) * 32.0
-                center_y = (float(row) + sigmoid(ty)) * 32.0
+            center_x = (float(col) + sigmoid(tx)) * 32.0
+            center_y = (float(row) + sigmoid(ty)) * 32.0
 
-                box.x1 = int(center_x - (box.w / 2.))
-                box.x2 = int(center_x + (box.w / 2.))
-                box.y1 = int(center_y - (box.h / 2.))
-                box.y2 = int(center_y + (box.h / 2.))
+            box.x1 = int(center_x - (box.w / 2.))
+            box.x2 = int(center_x + (box.w / 2.))
+            box.y1 = int(center_y - (box.h / 2.))
+            box.y2 = int(center_y + (box.h / 2.))
 
-                if box.p_max > probs_threshold:
-                    boxes.append(box)
+            if box.p_max > probs_threshold:
+                boxes.append(box)
 
-    boxes.sort(key=lambda b: b.p_max, reverse=True)
-
-    filtered_boxes = non_maximal_suppression(boxes, iou_threshold)
-
-    return filtered_boxes
 ```
 
-经过初步处理后的bounding box仍会有大量重叠的情况，这里使用非极大值抑制（NMS）对bounding box进行过滤(这里也可以使用[车辆识别（特征提取+svm分类器）](https://zhuanlan.zhihu.com/p/35607432)中介绍的heatmap进行过滤，只要达到使每个物体对应一个合适的bounding box的目的)：
+经过初步处理后的bounding box仍会有大量重叠的情况:
+
+![alt text][image6]
+
+这里使用非极大值抑制（NMS）对bounding box进行过滤(这里也可以使用[车辆识别（特征提取+svm分类器）](https://zhuanlan.zhihu.com/p/35607432)中介绍的heatmap进行过滤，只要达到使每个物体对应一个合适的bounding box的目的)：
 
 ```
 #使用non_maxsuppression 筛选box
@@ -202,4 +203,6 @@ def draw_boxes(image,boxes):
 
     return image
 ```
+结果图片：
+![alt text][image7]
 
