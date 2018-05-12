@@ -59,6 +59,7 @@ ps:本来是打算keras构建模型结构，然后加载weights文件训练后�
 获得[YAD2K](https://github.com/allanzelener/YAD2K);
 
 运行yad2k.py文件，参数依次为：cfg文件路径，weights文件路径，model文件输出路径.
+
 这里使用yolov2-tiny模型的voc版本，运行如下命令：
 ```
 python ./yad2k.py ./yolov2-tiny-voc.cfg ./yolov2-tiny-voc.weights ./model/yolov2-tiny-voc.h5
@@ -207,7 +208,7 @@ def draw_boxes(image,boxes):
 
     return image
 ```
-结果图片:
+结果:
 
 ![alt text][image7]
 
