@@ -101,7 +101,105 @@ predictions = model.predict_generator(gen)
 ```
 
 #### 阈值筛选bounding box
-得到predictions后，还要对predictions进行进一步处理,目的是过滤掉置信度低的及重叠的bounding box,使得每一个物体仅对应一个置信度最高的bounding box。
+得到predictions后，还要对predictions进行进一步处理,目的是过滤掉置信度低的及重叠的bounding box,使得图片的每一个物体对应一个置信度最高的bounding box。
+为了方便对predictions进行处理，这里定义一个box类对bounding box的参数进行存储:
+```
+class Box:
+    def __init__(self):
+        self.w = float()
+        self.h = float()
+        self.p_max = float()
+        self.clas = int()
+        self.x1 = int()
+        self.y1 = int()
+        self.x2 = int()
+        self.y2 = int()
+```
 
+模型预测的是bounding box的中心点坐标x,y及其宽w,高h及是否包含物体的confidence score和其所包含物体class的possibility，其中中心点坐标x,y及其宽w,高h都是相对于每个栅格（grid cell）而言的，因此这些参数都需要进行转换。使用confidence score与最大的class的possibility相乘可以得到置信度，对这个置信度进行一些阈值过滤可以过滤掉置信度不高的bounding box:
 
+```
+def process_predictions(prediction, n_grid=13, n_class=20, n_box=5, probs_threshold=0.3, iou_threshold=0.3):
+    prediction = np.reshape(prediction, (n_grid, n_grid, n_box, 5+n_class))
+    boxes = []
+    for row in range(n_grid):
+        for col in range(n_grid):
+            for b in range(n_box):
+                tx, ty, tw, th, tc = prediction[row, col, b, :5]
+                box = Box()
+
+                box.w = np.exp(tw) * anchors[2 * b + 0] * 32.0
+                box.h = np.exp(th) * anchors[2 * b + 1] * 32.0
+
+                c_probs = softmax(prediction[row, col, b, 5:])
+                box.clas = np.argmax(c_probs)
+                box.p_max = np.max(c_probs) * sigmoid(tc)
+
+                center_x = (float(col) + sigmoid(tx)) * 32.0
+                center_y = (float(row) + sigmoid(ty)) * 32.0
+
+                box.x1 = int(center_x - (box.w / 2.))
+                box.x2 = int(center_x + (box.w / 2.))
+                box.y1 = int(center_y - (box.h / 2.))
+                box.y2 = int(center_y + (box.h / 2.))
+
+                if box.p_max > probs_threshold:
+                    boxes.append(box)
+
+    boxes.sort(key=lambda b: b.p_max, reverse=True)
+
+    filtered_boxes = non_maximal_suppression(boxes, iou_threshold)
+
+    return filtered_boxes
+```
+
+经过初步处理后的bounding box仍会有大量重叠的情况，这里使用非极大值抑制（NMS）对bounding box进行过滤(这里也可以使用[车辆识别（特征提取+svm分类器）](https://zhuanlan.zhihu.com/p/35607432)中介绍的heatmap进行过滤，只要达到使每个物体对应一个合适的bounding box的目的)：
+
+```
+#使用non_maxsuppression 筛选box
+def non_maximal_suppression(thresholded_boxes, iou_threshold=0.3):
+    nms_boxes = []
+    if len(thresholded_boxes) > 0:
+        # 添加置信度最高的box
+        nms_boxes.append(thresholded_boxes[0])
+
+        i = 1
+        while i < len(thresholded_boxes):
+            n_boxes_to_check = len(nms_boxes)
+            to_delete = False
+
+            j = 0
+            while j < n_boxes_to_check:
+                curr_iou = iou(thresholded_boxes[i], nms_boxes[j])
+                if (curr_iou > iou_threshold):
+                    to_delete = True
+                j = j + 1
+
+            if to_delete == False:
+                nms_boxes.append(thresholded_boxes[i])
+            i = i + 1
+
+    return nms_boxes
+
+```
+
+最后把过滤后的bounding box展示在图片上,以下为示例代码:
+
+```
+#在图片上画出box
+def draw_boxes(image,boxes):
+    for i in range(len(boxes)):
+        color = colors[boxes[i].clas]
+        best_class_name = classes[boxes[i].clas]
+
+        image = cv2.rectangle(image, (boxes[i].x1, boxes[i].y1),
+                                    (boxes[i].x2, boxes[i].y2),color)
+
+        cv2.putText(
+            image, best_class_name + ' : %.2f' % boxes[i].p_max,
+            (int(boxes[i].x1 + 5), int(boxes[i].y1 - 7)), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+            color, 1)
+
+    return image
+```
 
