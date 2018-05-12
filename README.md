@@ -58,8 +58,48 @@ python ./yad2k.py ./yolov2-tiny-voc.cfg ./yolov2-tiny-voc.weights ./model/yolov2
 ```
 
 #### 使用model预测bounding box
-这里是一个使用keras的"predict_generator"对视频进行预测的示例(如果只是对少量图片且内存显存足够可以直接用"predict"):
+这里是一个使用keras的`predict_generator`对视频进行预测的示例(在内存显存足够的情况下可以直接用`predict`):
 
+首先使用opencv读取视频，并进行resize，normalize等预处理:
+```
+#把给定视频转换为图片
+def preprocess_video(src_path):
+    cap = cv2.VideoCapture(src_path)
+    num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    fps = int(cap.get(cv2.CAP_PROP_FPS))
+    fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))
+    video_frames = []
+    for i in range(num_frames):
+        ret, frame = cap.read()
+        if ret:
+            frame = cv2.resize(frame, (416, 416))
+            frame = preprocess_image(frame)
+            video_frames.append(frame)
+    video_frames = np.array(video_frames)
+    cap.release()
+    return video_frames,num_frames,fps,fourcc
+ ```
+ 
+利用yield写一个generator function，用于在预测时生成指定batch_size大小的图片batch：
+ ```
+#prediction_generator
+def video_batch_gen(video_frames,batch_size=32):
+    for offset in range(0,len(video_frames),batch_size):
+        yield video_frames[offset:offset+batch_size]
+ ```
+ 
+最后加载model,使用`predict_generator`进行预测:
+
+```
+video_frames, num_frames, fps, fourcc = utils.preprocess_video(src_path)
+gen = utils.video_batch_gen(video_frames,batch_size=batch_size)
+
+model = load_model("./model/yolov2-tiny-voc.h5")
+
+print("predicting......")
+predictions = model.predict_generator(gen)
+```
+ 
 
 
 
