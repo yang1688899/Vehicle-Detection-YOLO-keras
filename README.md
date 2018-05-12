@@ -154,7 +154,7 @@ for row in range(n_grid):
 
 ![alt text][image6]
 
-这里使用非极大值抑制（NMS）对bounding box进行过滤(这里也可以使用[车辆识别（特征提取+svm分类器）](https://zhuanlan.zhihu.com/p/35607432)中介绍的heatmap进行过滤，只要达到使每个物体对应一个合适的bounding box的目的)：
+这里使用非极大值抑制（NMS）对bounding box进行过滤(ps:也可以使用[车辆识别（特征提取+svm分类器）](https://zhuanlan.zhihu.com/p/35607432)中介绍的heatmap进行过滤，只要达到使每个物体对应一个合适的bounding box的目的)：
 
 ```
 #使用non_maxsuppression 筛选box
